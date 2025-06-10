@@ -167,10 +167,10 @@ Licensed under the MIT License. See [LICENSE](LICENSE) for details.
 
 ## Future Enhancements
 
-- Support for heterogeneous devices.
-- Dynamic topology updates during simulation.
-- Machine learning-based allocation.
-- Real-time monitoring and adaptation.
+- Real-time Monitoring: Live dashboard for simulation progress and metrics
+- Heterogeneous Devices: Support for IoT sensors, edge servers, and mobile devices
+- Fault Tolerance: Node failure simulation and recovery mechanisms
+- Multi-tenant Support: Isolation and resource sharing between multiple users
 
 ## Support
 
