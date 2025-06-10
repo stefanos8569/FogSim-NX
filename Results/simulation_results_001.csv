@@ -1,0 +1,6 @@
+Run ID,Topology Nodes Count,Topology File,App Count,Allocation Method,Allocated Count,Simple Node Allocations,Cloud Allocations,Utilized Simple Nodes,Total CPU (MIPS),Total RAM (GB),Total Storage (GB),Total Bandwidth (Gbps),Total Latency (s),Total Makespan (s),Total Workload (WU),Total Energy (W),Total Cost (€)
+Simulation Run 001,51,Topology\topology_n50_1.graphml,2000,Neighbor-Aware,2000,388,1612,39,1194417,2182,2427,16244,401,8520,1305759,1246,9059
+Simulation Run 002,101,Topology\topology_n100_1.graphml,2000,Neighbor-Aware,2000,995,1005,79,1187285,2118,2422,10417,404,4609,1289600,1450,8928
+Simulation Run 003,201,Topology\topology_n200_1.graphml,2000,Neighbor-Aware,2000,1790,210,159,1179597,2129,2445,2826,405,268,1294185,1633,8837
+Simulation Run 004,301,Topology\topology_n300_1.graphml,2000,Neighbor-Aware,2000,2000,0,202,1187219,2133,2436,801,405,242,1295400,1750,9123
+Simulation Run 005,401,Topology\topology_n400_1.graphml,2000,Neighbor-Aware,2000,2000,0,224,1222835,2210,2452,804,405,304,1325065,1737,9095
