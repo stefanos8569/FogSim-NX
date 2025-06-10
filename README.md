@@ -18,6 +18,11 @@ FogSim-NX is a NetworkX-based simulation framework for fog computing, designed t
 - Export: Saves results to CSV files in the `Results/` folder.
 - Configuration: Customizable via `config.ini`.
 
+## Allocation Algorithms
+
+- Neighbor-Aware is faster, locally optimal, and suited for real-time allocation but may rely more on the cloud, increasing costs and latency.
+- PSO is slower, globally optimal, and better for batch processing, minimizing cloud usage and balancing multiple objectives (makespan, energy, cost).
+
 ## Example Topology
 
 ![Sample Fog Computing Topology](Topology/topology_n50_1.png)
