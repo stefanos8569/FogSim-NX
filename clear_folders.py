@@ -1,3 +1,4 @@
+# Clears all content from the 'Results' and 'Topology' folders
 import os
 from pathlib import Path
 
