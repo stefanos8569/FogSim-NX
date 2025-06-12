@@ -94,7 +94,7 @@ def generate_graph(node_count: int, edge_prob: float, config: Dict[str, Any]) ->
 
     # Save the graph after adding all nodes and attributes
     nx.write_graphml(G, graphml_file)
-    print(f"Graph saved to {graphml_file}.")
+    print(f"Graph saved to {graphml_file}.\n") 
 
     # Ensure all non-gateway nodes in a graph G are connected to at least one gateway node
     for node in G.nodes:
@@ -108,7 +108,7 @@ def generate_graph(node_count: int, edge_prob: float, config: Dict[str, Any]) ->
     # Visualization (unchanged)
     plt.figure(figsize=(12, 12))
     nx.draw_networkx_nodes(G, pos, nodelist=[n for n in G.nodes if n not in gateway_list and n != main_gateway and n != cloud],
-                           node_color='skyblue', node_shape='o', node_size=500, label='Regular Nodes')
+                           node_color='skyblue', node_shape='o', node_size=500, label='Regular Fog Nodes')
     nx.draw_networkx_nodes(G, pos, nodelist=gateway_list, node_color='lightgreen', node_shape='s', node_size=600, label='Gateway Nodes')
     nx.draw_networkx_nodes(G, pos, nodelist=[main_gateway], node_color='limegreen', node_shape='s', node_size=900, label='Main Gateway')
     nx.draw_networkx_nodes(G, pos, nodelist=[cloud], node_color='salmon', node_shape='o', node_size=1000, label='Cloud Node')
