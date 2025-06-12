@@ -25,9 +25,9 @@ FogSim-NX is a NetworkX-based simulation framework for fog computing, designed t
 
 ## Example Topology
 
-![Sample Fog Computing Topology](Topology/topology_n50_1.png)
+![Sample Fog Computing Topology](Topologies/topology_n50_1.png)
 
-The image above shows a generated Erdős-Rényi topology with regular nodes (blue), gateway nodes (green), main gateway (lime green), and external cloud (red).
+The image above shows a generated Erdős-Rényi topology with fog nodes (blue), gateway nodes (green), main gateway (lime green), and external cloud (red).
 
 ## Installation
 
