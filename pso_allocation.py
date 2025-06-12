@@ -11,8 +11,8 @@ def run_pso_allocation(graph: nx.Graph, app_count: int, config: Dict[str, Any], 
     
     # Identify nodes in the graph and classify them as regular or external cloud nodes
     start_nodes = time.time()
-    simple_nodes = [n for n in graph.nodes if graph.nodes[n].get('node_type') == 'regular']
-    all_nodes = simple_nodes + [external_cloud]
+    fog_nodes = [n for n in graph.nodes if graph.nodes[n].get('node_type') == 'regular']
+    all_nodes = fog_nodes + [external_cloud]
     num_nodes = len(all_nodes)
     if not all_nodes:
         raise ValueError("No nodes available for allocation.")
@@ -33,8 +33,8 @@ def run_pso_allocation(graph: nx.Graph, app_count: int, config: Dict[str, Any], 
     concurrency_limit = max(500, int(avg_cpu_per_app / 2))
 
     results = {
-        'allocated_count': 0, 'simple_node_allocations': 0, 'cloud_allocations': 0,
-        'utilized_simple_nodes': set(), 'total_CPU': 0.0, 'total_RAM': 0.0,
+        'allocated_count': 0, 'fog_node_allocations': 0, 'cloud_allocations': 0,
+        'utilized_fog_nodes': set(), 'total_CPU': 0.0, 'total_RAM': 0.0,
         'total_storage': 0.0, 'total_Bandwidth': 0.0, 'total_Latency': 0.0,
         'total_Makespan': 0.0, 'total_Workload': 0.0, 'total_Energy': 0.0,
         'total_Cost': 0.0, 'allocation_status': [], 'iteration_scores': []
@@ -169,8 +169,8 @@ def run_pso_allocation(graph: nx.Graph, app_count: int, config: Dict[str, Any], 
             node_app_counts[target_node] += 1
             results['allocated_count'] += 1
             if graph.nodes[target_node].get('node_type') == 'regular':
-                results['simple_node_allocations'] += 1
-                results['utilized_simple_nodes'].add(target_node)
+                results['fog_node_allocations'] += 1
+                results['utilized_fog_nodes'].add(target_node)
             elif graph.nodes[target_node].get('node_type') == 'cloud':
                 results['cloud_allocations'] += 1
             results['total_CPU'] += app['CPU']
@@ -248,8 +248,8 @@ def run_pso_allocation(graph: nx.Graph, app_count: int, config: Dict[str, Any], 
             node_app_counts[target_node] += 1
             results['allocated_count'] += 1
             if graph.nodes[target_node].get('node_type') == 'regular':
-                results['simple_node_allocations'] += 1
-                results['utilized_simple_nodes'].add(target_node)
+                results['fog_node_allocations'] += 1
+                results['utilized_fog_nodes'].add(target_node)
             elif graph.nodes[target_node].get('node_type') == 'cloud':
                 results['cloud_allocations'] += 1
             results['total_CPU'] += app['CPU']
@@ -291,7 +291,7 @@ def run_pso_allocation(graph: nx.Graph, app_count: int, config: Dict[str, Any], 
             }
 
     # Finalize results and log execution details
-    results['utilized_simple_nodes_count'] = len(results['utilized_simple_nodes'])
+    results['utilized_fog_nodes_count'] = len(results['utilized_fog_nodes'])
     results['total_Makespan'] = max(node_makespans.values()) if node_makespans else 0.0
     print(f"Concurrency Limit: {concurrency_limit}")
     print(f"Node Makespans: {node_makespans}")

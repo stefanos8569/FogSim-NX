@@ -15,11 +15,11 @@ def define_applications(app_count: int, config: Dict[str, Any]) -> List[Dict[str
 def run_neighbor_allocation(graph: nx.Graph, app_count: int, config: Dict[str, Any], external_cloud: int) -> Dict[str, Any]:
     """
     Neighbor aware Forwarding allocation method.
-    Gateways forward apps to simple nodes with minimal makespan increase; if simple nodes fail, neighbors are tried;
+    Gateways forward apps to fog nodes with minimal makespan increase; if fog nodes fail, neighbors are tried;
     if all fail, the main gateway forwards to the external cloud.
     """
     # Identify node types
-    simple_nodes = [n for n in graph.nodes if graph.nodes[n].get('node_type') == 'regular']
+    fog_nodes = [n for n in graph.nodes if graph.nodes[n].get('node_type') == 'regular']
     gateway_nodes = [n for n in graph.nodes if graph.nodes[n].get('node_type') == 'gateway']
     main_gateway = max(nx.betweenness_centrality(graph).items(), key=lambda x: x[1])[0]  # Highest centrality as main gateway
 
@@ -29,9 +29,9 @@ def run_neighbor_allocation(graph: nx.Graph, app_count: int, config: Dict[str, A
     # Initialize results
     results = {
         'allocated_count': 0,
-        'simple_node_allocations': 0,
+        'fog_node_allocations': 0,
         'cloud_allocations': 0,
-        'utilized_simple_nodes': set(),
+        'utilized_fog_nodes': set(),
         'total_CPU': 0.0,
         'total_RAM': 0.0,
         'total_storage': 0.0,
@@ -62,14 +62,14 @@ def run_neighbor_allocation(graph: nx.Graph, app_count: int, config: Dict[str, A
         allocated = False
         target_node = None
 
-        # Step 1: Select gateway with minimal load and forward to a simple node
+        # Step 1: Select gateway with minimal load and forward to a fog node
         selected_gateway = min(gateway_load.items(), key=lambda x: x[1])[0]  # Gateway with least apps assigned
-        simple_neighbors = [n for n in graph.neighbors(selected_gateway) if n in simple_nodes]
+        fog_neighbors = [n for n in graph.neighbors(selected_gateway) if n in fog_nodes]
         
-        if simple_neighbors:
+        if fog_neighbors:
             min_makespan_increase = float('inf')
             best_node = None
-            for neighbor in simple_neighbors:
+            for neighbor in fog_neighbors:
                 if (node_resources[neighbor]['cpu_remaining'] >= app['CPU'] and
                     node_resources[neighbor]['ram_remaining'] >= app['RAM'] and
                     node_resources[neighbor]['storage_remaining'] >= app['Storage']):
@@ -95,7 +95,7 @@ def run_neighbor_allocation(graph: nx.Graph, app_count: int, config: Dict[str, A
             best_node = None
             best_gateway = None
             for gateway in gateway_nodes:
-                neighbors = [n for n in graph.neighbors(gateway) if n in simple_nodes]
+                neighbors = [n for n in graph.neighbors(gateway) if n in fog_nodes]
                 for neighbor in neighbors:
                     if (node_resources[neighbor]['cpu_remaining'] >= app['CPU'] and
                         node_resources[neighbor]['ram_remaining'] >= app['RAM'] and
@@ -133,8 +133,8 @@ def run_neighbor_allocation(graph: nx.Graph, app_count: int, config: Dict[str, A
             node_app_counts[target_node] += 1
             results['allocated_count'] += 1
             if graph.nodes[target_node].get('node_type') == 'regular':
-                results['simple_node_allocations'] += 1
-                results['utilized_simple_nodes'].add(target_node)
+                results['fog_node_allocations'] += 1
+                results['utilized_fog_nodes'].add(target_node)
             elif graph.nodes[target_node].get('node_type') == 'cloud':
                 results['cloud_allocations'] += 1
 
@@ -189,7 +189,7 @@ def run_neighbor_allocation(graph: nx.Graph, app_count: int, config: Dict[str, A
         })
 
     # Finalize results
-    results['utilized_simple_nodes_count'] = len(results['utilized_simple_nodes'])
+    results['utilized_fog_nodes_count'] = len(results['utilized_fog_nodes'])
     results['total_Makespan'] = max(node_makespans.values()) if node_makespans else 0.0
 
     # print(f"Concurrency Limit: {concurrency_limit}")

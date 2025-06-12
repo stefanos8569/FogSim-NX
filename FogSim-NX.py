@@ -31,19 +31,19 @@ def read_config(file_path: str) -> Dict[str, Dict[str, Any]]:
 
 def generate_graph(node_count: int, edge_prob: float, config: Dict[str, Any]) -> str:
     """Generates a connected Erdős-Rényi graph with the specified number of nodes and one external cloud node."""
-    simple_node_count = node_count
-    edge_prob = edge_prob or config['TOPOLOGY_ATTRIBUTES']['f_edge_prob']
-    G = nx.erdos_renyi_graph(simple_node_count, edge_prob)
+    fog_node_count = node_count
+    edge_prob = edge_prob or config['FOG_ATTRIBUTES']['f_edge_prob']
+    G = nx.erdos_renyi_graph(fog_node_count, edge_prob)
     while not nx.is_connected(G):
-        G = nx.erdos_renyi_graph(simple_node_count, edge_prob)
+        G = nx.erdos_renyi_graph(fog_node_count, edge_prob)
 
     # Initialize all nodes with default attributes and node_type='regular'
     for node in G.nodes:
-        G.nodes[node]['cpu'] = random.randint(config['TOPOLOGY_ATTRIBUTES']['f_cpu_min'], config['TOPOLOGY_ATTRIBUTES']['f_cpu_max'])
-        G.nodes[node]['ram'] = random.randint(config['TOPOLOGY_ATTRIBUTES']['f_ram_min'], config['TOPOLOGY_ATTRIBUTES']['f_ram_max'])
-        G.nodes[node]['storage'] = random.randint(config['TOPOLOGY_ATTRIBUTES']['f_storage_min'], config['TOPOLOGY_ATTRIBUTES']['f_storage_max'])
+        G.nodes[node]['cpu'] = random.randint(config['FOG_ATTRIBUTES']['f_cpu_min'], config['FOG_ATTRIBUTES']['f_cpu_max'])
+        G.nodes[node]['ram'] = random.randint(config['FOG_ATTRIBUTES']['f_ram_min'], config['FOG_ATTRIBUTES']['f_ram_max'])
+        G.nodes[node]['storage'] = random.randint(config['FOG_ATTRIBUTES']['f_storage_min'], config['FOG_ATTRIBUTES']['f_storage_max'])
         G.nodes[node]['bandwidth'] = max(
-            random.uniform(config['TOPOLOGY_ATTRIBUTES']['f_bandwidth_min'], config['TOPOLOGY_ATTRIBUTES']['f_bandwidth_max']),
+            random.uniform(config['FOG_ATTRIBUTES']['f_bandwidth_min'], config['FOG_ATTRIBUTES']['f_bandwidth_max']),
             0.1
         )
         G.nodes[node]['node_type'] = 'regular'  # Default to regular
@@ -51,12 +51,12 @@ def generate_graph(node_count: int, edge_prob: float, config: Dict[str, Any]) ->
     
     # Set edge attributes
     for edge in G.edges:
-        G.edges[edge]['propagation_delay'] = round(random.uniform(config['TOPOLOGY_ATTRIBUTES']['f_propagation_delay_min'], config['TOPOLOGY_ATTRIBUTES']['f_propagation_delay_max']), 3)
-        G.edges[edge]['bandwidth'] = round(random.uniform(config['TOPOLOGY_ATTRIBUTES']['f_bandwidth_min'], config['TOPOLOGY_ATTRIBUTES']['f_bandwidth_max']), 3)
+        G.edges[edge]['propagation_delay'] = round(random.uniform(config['FOG_ATTRIBUTES']['f_propagation_delay_min'], config['FOG_ATTRIBUTES']['f_propagation_delay_max']), 3)
+        G.edges[edge]['bandwidth'] = round(random.uniform(config['FOG_ATTRIBUTES']['f_bandwidth_min'], config['FOG_ATTRIBUTES']['f_bandwidth_max']), 3)
 
     pos = nx.spring_layout(G)
-    Path('Topology').mkdir(exist_ok=True)
-    graph_base_filename = f'Topology/topology_n{simple_node_count}'
+    Path('Topologies').mkdir(exist_ok=True)
+    graph_base_filename = f'Topologies/topology_n{fog_node_count}'
     graph_file_id = 1
     while os.path.exists(f'{graph_base_filename}_{graph_file_id}.graphml'):
         graph_file_id += 1
@@ -70,8 +70,8 @@ def generate_graph(node_count: int, edge_prob: float, config: Dict[str, Any]) ->
     # Identify and tag additional gateway nodes
     centrality = nx.degree_centrality(G)
     sorted_nodes = sorted(centrality, key=centrality.get)
-    gateway_percentage = config['TOPOLOGY_ATTRIBUTES']['f_gateway_percentage']
-    gateway_node_count = max(1, int(gateway_percentage * simple_node_count))
+    gateway_percentage = config['FOG_ATTRIBUTES']['f_gateway_percentage']
+    gateway_node_count = max(1, int(gateway_percentage * fog_node_count))
     gateway_list = sorted_nodes[:gateway_node_count]
     for node in gateway_list:
         if node != main_gateway:  # Avoid overwriting main gateway
@@ -102,8 +102,8 @@ def generate_graph(node_count: int, edge_prob: float, config: Dict[str, Any]) ->
             if not any(neighbor in gateway_list for neighbor in G.neighbors(node)):
                 gateway_node = random.choice(gateway_list)
                 G.add_edge(node, gateway_node, 
-                           propagation_delay=random.uniform(config['TOPOLOGY_ATTRIBUTES']['f_propagation_delay_min'], config['TOPOLOGY_ATTRIBUTES']['f_propagation_delay_max']),
-                           bandwidth=random.uniform(config['TOPOLOGY_ATTRIBUTES']['f_bandwidth_min'], config['TOPOLOGY_ATTRIBUTES']['f_bandwidth_max']))
+                           propagation_delay=random.uniform(config['FOG_ATTRIBUTES']['f_propagation_delay_min'], config['FOG_ATTRIBUTES']['f_propagation_delay_max']),
+                           bandwidth=random.uniform(config['FOG_ATTRIBUTES']['f_bandwidth_min'], config['FOG_ATTRIBUTES']['f_bandwidth_max']))
 
     # Visualization (unchanged)
     plt.figure(figsize=(12, 12))
@@ -165,13 +165,13 @@ if __name__ == '__main__':
         while True:
             use_existing_topology = input('Do you want to use an existing topology (y), create new (n), or exit (e)? [y/n/e]: ').strip().lower()
             if use_existing_topology == 'y':
-                topology_folder = Path('Topology')
+                topology_folder = Path('Topologies')
                 if not topology_folder.exists():
-                    print("Error: No 'Topology' folder found. Please generate a topology first.")
+                    print("Error: No 'Topologies' folder found. Please generate a topology first.")
                     continue  # Loop back to the input prompt
                 graphml_files = list(topology_folder.glob('*.graphml'))
                 if not graphml_files:
-                    print("Error: No .graphml files found in the 'Topology' folder. Please generate a topology first.")
+                    print("Error: No .graphml files found in the 'Topologies' folder. Please generate a topology first.")
                     continue  # Loop back to the input prompt
                 print("Available topologies:")
                 for i, file in enumerate(graphml_files, start=1):
@@ -185,7 +185,7 @@ if __name__ == '__main__':
             elif use_existing_topology == 'n':
                 num_nodes = int(input('Creating new Topology - Enter the number of nodes : '))
                 print(f"Generating new topology with {num_nodes} nodes...")
-                graphml_file = generate_graph(num_nodes, config['TOPOLOGY_ATTRIBUTES']['f_edge_prob'], config)
+                graphml_file = generate_graph(num_nodes, config['FOG_ATTRIBUTES']['f_edge_prob'], config)
                 break
             elif use_existing_topology == 'e':
                 print("Exiting the program.")
@@ -240,9 +240,9 @@ if __name__ == '__main__':
     # Print results
     print(f"\nSimulation Results:")
     print(f"Allocated {results['allocated_count']} out of {app_count} applications.")    
-    print(f"Applications allocated to simple nodes: {results['simple_node_allocations']}")
+    print(f"Applications allocated to fog nodes: {results['fog_node_allocations']}")
     print(f"Applications allocated to the Cloud: {results['cloud_allocations']}")
-    print(f"\nNumber of simple nodes utilized: {results['utilized_simple_nodes_count']}")
+    print(f"\nNumber of fog nodes utilized: {results['utilized_fog_nodes_count']}")
     print(f"Total CPU Used: {results['total_CPU']} MIPS")
     print(f"Total RAM Used: {int(results['total_RAM'] / 1024)} GB")
     print(f"Total Storage Used: {int(results['total_storage'] / 1024)} GB")

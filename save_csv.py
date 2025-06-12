@@ -22,7 +22,7 @@ def save_to_csv(
     # Define CSV headers
     headers = [
         "Run ID", "Topology Nodes Count", "Topology File", "App Count", "Allocation Method",
-        "Allocated Count", "Simple Node Allocations", "Cloud Allocations", "Utilized Simple Nodes",
+        "Allocated Count", "Fog Node Allocations", "Cloud Allocations", "Utilized Fog Nodes",
         "Total CPU (MIPS)", "Total RAM (GB)", "Total Storage (GB)", "Total Bandwidth (Gbps)",
         "Total Latency (s)", "Total Makespan (s)", "Total Workload (WU)", "Total Energy (W)", "Total Cost (€)"
     ]
@@ -68,9 +68,9 @@ def save_to_csv(
         app_count,
         allocation_method,
         results['allocated_count'],
-        results['simple_node_allocations'],
+        results['fog_node_allocations'],
         results['cloud_allocations'],
-        results['utilized_simple_nodes_count'],
+        results['utilized_fog_nodes_count'],
         int(results['total_CPU']),  # Convert MIPS to integer
         int(results['total_RAM'] / 1024),  # Convert MB to GB and ensure integer
         int(results['total_storage'] / 1024),  # Convert MB to GB and ensure integer
